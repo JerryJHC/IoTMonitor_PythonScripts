@@ -1,7 +1,16 @@
 # importing the requests library 
 import requests
+import json
 from sense_hat import SenseHat
 from datetime import datetime
+
+# Convert datetime to json serializable
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+
+        return json.JSONEncoder.default(self, o)
 
 sense = SenseHat()
 
@@ -15,7 +24,7 @@ data = {"temperature": sense.get_temperature(),
 		"datetime": datetime.now()} 
 
 # sending post request and saving response as response object 
-r = requests.post(url = API_ENDPOINT, data = data) 
+r = requests.post(url = API_ENDPOINT, data=json.dumps(data, cls=DateTimeEncoder), headers={'Content-Type': 'application/json'})
 
 # extracting response text 
 pastebin_url = r.text 
